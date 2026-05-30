@@ -1,19 +1,9 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 
-export type VideoStats = {
-  videoId: string;
-  title: string;
-  channel: string;
-  channelUrl?: string;
-  publishedAt?: string;
-  thumbnail?: string;
-  views: number | null;
-  likes: number | null;
-  comments: number | null;
-  durationSeconds?: number | null;
-  url: string;
-};
+import type { VideoStats } from "./youtube-types";
+
+export type { VideoStats };
 
 function toNumber(value: unknown): number | null {
   if (value === null || value === undefined) return null;
