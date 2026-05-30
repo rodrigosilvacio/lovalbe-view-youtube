@@ -1,7 +1,7 @@
 import { Eye, ThumbsUp, MessageSquare, ExternalLink, Calendar, User } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import type { VideoStats } from "@/lib/mcp-bancos.server";
+import type { VideoStats } from "@/lib/youtube-types";
 
 function formatNumber(n: number | null): string {
   if (n === null) return "—";
