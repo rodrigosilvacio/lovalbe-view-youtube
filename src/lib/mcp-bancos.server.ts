@@ -129,19 +129,28 @@ export async function fetchVideoStatsViaMcp(rawUrl: string): Promise<VideoStats>
   try {
     await client.connect(transport);
 
-    // Step 1: resolve URL -> videoId
-    const resolved = await callTool(client, "youtube_resolve_url", { url: rawUrl });
-    const resolvedData =
-      digFirst(resolved, ["data", "result"]) ?? (resolved as Record<string, unknown>);
-    const videoId =
-      pickString(resolvedData, ["videoId", "video_id", "id"]) ??
-      pickString(resolved as Record<string, unknown>, ["videoId", "video_id", "id"]);
+    // Step 1: extract videoId locally (avoids burning MCP quota on resolve)
+    let videoId = extractVideoIdFromUrl(rawUrl);
+    if (!videoId) {
+      // Fallback: ask MCP to resolve share/short links
+      const resolved = await callTool(client, "youtube_resolve_url", { url: rawUrl });
+      const resolveErr = detectToolError(resolved);
+      if (resolveErr) throw new Error(`MCP youtube_resolve_url: ${resolveErr}`);
+      const resolvedData =
+        digFirst(resolved, ["data", "result"]) ?? (resolved as Record<string, unknown>);
+      videoId =
+        pickString(resolvedData, ["videoId", "video_id", "id"]) ??
+        pickString(resolved as Record<string, unknown>, ["videoId", "video_id", "id"]) ??
+        null;
+    }
     if (!videoId) {
       throw new Error("Não foi possível extrair o videoId da URL informada.");
     }
 
     // Step 2: download metadata (formats + stats)
     const downloaded = await callTool(client, "youtube_download", { id: videoId });
+    const dlErr = detectToolError(downloaded);
+    if (dlErr) throw new Error(`MCP youtube_download: ${dlErr}`);
 
     const root = (downloaded ?? {}) as Record<string, unknown>;
     const data =
