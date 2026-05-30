@@ -84,7 +84,7 @@ function Index() {
               />
               <Button
                 type="submit"
-                disabled={mutation.isPending || !url.trim()}
+                disabled={mutation.isPending}
                 className="sm:min-w-32"
               >
                 {mutation.isPending ? (
